@@ -1,0 +1,10 @@
+{
+  "profiles": {
+    "IotPortal.DevicePlaceholder": {
+      "commandName": "Project"
+    },
+    "Container (Dockerfile)": {
+      "commandName": "Docker"
+    }
+  }
+}
