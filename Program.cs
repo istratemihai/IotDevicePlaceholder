@@ -31,7 +31,7 @@ namespace IotPortal.DevicePlaceholder.src
                     double value = random.NextDouble() * 100;
 
                     // Format telemetry data as string
-                    string telemetryData = JsonSerializer.Serialize(new TelemetryData(name, value.ToString(), timestamp));
+                    string telemetryData = JsonSerializer.Serialize(new TelemetryData(name, value, timestamp));
                    
                     // Add delimiter to the telemetry data
                     string delimitedData = telemetryData + "<|endofmessage|>";
@@ -56,5 +56,5 @@ namespace IotPortal.DevicePlaceholder.src
     }
 }
 
-public record class TelemetryData(string Name, string Value, DateTime TimeStamp);
+public record class TelemetryData(string Name, double Value, DateTime TimeStamp);
 
