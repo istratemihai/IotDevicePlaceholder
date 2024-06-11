@@ -9,49 +9,49 @@ namespace IotPortal.DevicePlaceholder.src
     {
         static async Task Main(string[] args)
         {
-            string serverIP = "192.168.56.1"; //Environment.GetEnvironmentVariable("SERVER_HOST") ?? "localhost";
-            int serverPort = 8888; // Change this to your server's port
+            string serverIP =  Environment.GetEnvironmentVariable("SERVER_HOST") ?? "localhost";
+            int serverPort = 8888; 
 
-            try
+
+            TcpClient client = new TcpClient(serverIP, serverPort);
+            Console.WriteLine(client.Connected);
+
+            using NetworkStream stream = client.GetStream();
+
+            while (true)
             {
-                // Create a TcpClient
-                TcpClient client = new TcpClient(serverIP, serverPort);
-                Console.WriteLine(client.Connected);
+                // Read temperature from sensor
+                double temperature = ReadTemperature();
 
-                // Get a network stream
-                using NetworkStream stream = client.GetStream();
+                string measurementName = "Temperature";
+                DateTime timestamp = DateTime.Now;
+                double value = temperature;
+                string telemetryData = JsonSerializer.Serialize(new TelemetryData(measurementName, value, timestamp));
 
-                int counts = 0;
-                Random random = new();
-                while (true)
-                {
-                    // Create telemetry data
-                    string name = "Temperature";
-                    DateTime timestamp = DateTime.Now;
-                    double value = random.NextDouble() * 100;
-
-                    // Format telemetry data as string
-                    string telemetryData = JsonSerializer.Serialize(new TelemetryData(name, value, timestamp));
-                   
-                    // Add delimiter to the telemetry data
-                    string delimitedData = telemetryData + "<|endofmessage|>";
-
-                    // Convert the string data to bytes
-                    byte[] data = Encoding.ASCII.GetBytes(delimitedData);
-
-                    // Send the data over the network
-                     await stream.WriteAsync(data);
-                    await Task.Delay(200);
-                }
-
-                // Clean up
-                stream.Close();
-                client.Close();
+                await SendData(stream, telemetryData);
+                await Task.Delay(200);
             }
-            catch (Exception ex)
-            {
-                Console.WriteLine("Error: " + ex.Message);
-            }
+
+            stream.Close();
+            client.Close();
+
+        }
+
+        private static async Task SendData(NetworkStream stream, string telemetryData)
+        {
+            string delimitedData = telemetryData + "<|endofmessage|>";
+
+            byte[] data = Encoding.ASCII.GetBytes(delimitedData);
+
+            await stream.WriteAsync(data);
+        }
+
+        static double ReadTemperature()
+        {
+
+            Random random = new();
+            double temperature = random.NextDouble() * 100;
+            return temperature;
         }
     }
 }
